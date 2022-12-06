@@ -29,7 +29,6 @@ logger = Logger(log_uncaught_exceptions=True)
 
 @logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, LambdaContext) -> dict:
-    print(event)
     logger.info({"operation": "Data Processing Lambda", "event": event})
     successes = 0 
     failures = 0
@@ -62,7 +61,7 @@ def lambda_handler(event, LambdaContext) -> dict:
             logger.info({"operation": "Data Processing Lambda", "CSV Results": result_csv})
             successes += 1
             output.append({
-                "recordId": result["uid"]["S"],
+                "recordId": record["recordId"],
                 "result": 'Ok',
                 "data": b64encode(result_csv.encode('utf-8'))
             })
@@ -70,11 +69,12 @@ def lambda_handler(event, LambdaContext) -> dict:
             failures += 1
             logger.info({"Validation Error": error})
             output.append({
-                "recordId": result["uid"]["S"],
+                "recordId": record["recordId"],
                 "result": 'ProcessingFailed',
                 "data": b64encode(formatted_data.encode('utf-8'))
             })
 
     logger.info(f"Processing Finished:  Successful Records: {successes}, Failed Records: {failures}")
-    return output
+    logger.info(f"Output: {output}")
+    return {"records": output}
 

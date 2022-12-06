@@ -4,10 +4,11 @@ import os
 import aws_cdk as cdk
 
 from enviro_digital_twin.digital_representative import DigitalRepresentative
+from enviro_digital_twin.global_representative_stack import GlobalRepresentative
 
 
 app = cdk.App()
-DigitalRepresentative(app, "DigitalRepresentativeStack",
+digital_rep = DigitalRepresentative(app, "DigitalRepresentativeStack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.
@@ -24,5 +25,8 @@ DigitalRepresentative(app, "DigitalRepresentativeStack",
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
     rep_id = 1)
+
+global_rep = GlobalRepresentative(app, "GlobalRepresentativeStack", buckets=[digital_rep.bucket.bucket_arn])
+global_rep.add_dependency(digital_rep)
 
 app.synth()

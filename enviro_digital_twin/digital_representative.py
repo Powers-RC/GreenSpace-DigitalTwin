@@ -133,7 +133,8 @@ class DigitalRepresentative(Stack):
             },
             architecture=lambda_.Architecture.ARM_64,
             log_retention=logs.RetentionDays.ONE_MONTH,
-            layers=[powertools_layer]
+            layers=[powertools_layer],
+            timeout=Duration.minutes(1)
         )
 
         dead_letter_queue = sqs.Queue(self, f"{thing_name}-StreamDeadLetterQueue")
@@ -151,6 +152,8 @@ class DigitalRepresentative(Stack):
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True
         )
+
+        self.bucket = bucket
 
         backup_bucket = s3.Bucket(self,
             f"{thing_name}-BackupTransformBucket",
@@ -173,7 +176,8 @@ class DigitalRepresentative(Stack):
             },
             architecture=lambda_.Architecture.ARM_64,
             log_retention=logs.RetentionDays.ONE_MONTH,
-            layers=[powertools_layer]
+            layers=[powertools_layer],
+            timeout=Duration.minutes(1)
         )
 
         processor = firehose.LambdaFunctionProcessor(data_processing_function,
@@ -198,7 +202,7 @@ class DigitalRepresentative(Stack):
                 log_group=log_group,
                 processor=processor,
                 compression=destinations.Compression.GZIP,
-                data_output_prefix=f"{thing_name}" + "/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/!{timestamp:HH}/",
+                data_output_prefix=f"{thing_name}" + "/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}",
                 error_output_prefix=f"{thing_name}" + "-FirehoseFailures/!{firehose:error-output-type}/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}",
                 buffering_interval=Duration.seconds(60),
                 buffering_size=Size.mebibytes(1),
@@ -207,7 +211,7 @@ class DigitalRepresentative(Stack):
                     mode=destinations.BackupMode.ALL,
                     bucket=backup_bucket,
                     compression=destinations.Compression.ZIP,
-                    data_output_prefix=f"{thing_name}" + "-Backup/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/!{timestamp:HH}/",
+                    data_output_prefix=f"{thing_name}" + "-Backup/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}",
                     error_output_prefix=f"{thing_name}" + "-Backup-FirehoseFailures/!{firehose:error-output-type}/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}",
                     buffering_interval=Duration.seconds(60),
                     buffering_size=Size.mebibytes(1),

@@ -4,9 +4,13 @@ __pycache__
 .pytest_cache
 .venv
 *.egg-info
+.env
 
 # CDK asset staging directory
 .cdk.staging
 cdk.out
 
 certs/
+
+enviro_digital_twin/lambdas/data_processing_lambda/data-lambda-deployment.zip
+enviro_digital_twin/lambdas/aurora_processing_lambda/.build
