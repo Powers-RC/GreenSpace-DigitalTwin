@@ -23,7 +23,13 @@ class GlobalRepresentative(Stack):
             id="lambda-powertools",
             layer_version_arn=f"arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:16"
         )
-    
+
+        psycopg2_layer = lambda_.LayerVersion.from_layer_version_arn(
+            self,
+            id="lambda-psycopg2",
+            layer_version_arn=f"arn:aws:lambda:us-east-1:898466741470:layer:psycopg2-py38:2"
+        )
+
         # Create a vpc
         vpc = ec2.Vpc(self, "GlobalRepresentativeVPC")
 
@@ -63,7 +69,7 @@ class GlobalRepresentative(Stack):
             },
             architecture=lambda_.Architecture.ARM_64,
             log_retention=logs.RetentionDays.ONE_MONTH,
-            layers=[powertools_layer],
+            layers=[powertools_layer, psycopg2_layer],
         )
 
         self.processing_lambda = aurora_processing_function
